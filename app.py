@@ -1,6 +1,7 @@
 #!venv/bin/python
 import os
-from flask import Flask, url_for, redirect, render_template, request, abort
+from flask import Flask, url_for, redirect, render_template, request, abort, flash
+from flask_babel import gettext, ngettext
 from flask_sqlalchemy import SQLAlchemy
 from flask_security import Security, SQLAlchemyUserDatastore, \
     UserMixin, RoleMixin, login_required, current_user
@@ -9,6 +10,8 @@ import flask_admin
 from flask_admin.contrib import sqla
 from flask_admin import helpers as admin_helpers
 from flask_admin import BaseView, expose
+from flask_admin.actions import action
+
 
 # Create Flask application
 app = Flask(__name__)
@@ -86,6 +89,18 @@ class MyModelView(sqla.ModelView):
     can_view_details = True
     details_modal = True
 
+    # def render(self, template, **kwargs):
+    #     # we are only interested in the summary_list page
+        
+    #         # append a summary_data dictionary into kwargs
+    #         # The title attribute value appears in the actions column
+    #         # all other attributes correspond to their respective Flask-Admin 'column_list' definition
+    #     kwargs['total_users'] = self.total_users() 
+    #     return super(UserView, self).render(template, **kwargs)
+    # def total_users(self):
+    # # this should take into account any filters/search inplace
+    #     return 5
+
 class UserView(MyModelView):
     column_editable_list = ['email', 'first_name', 'last_name']
     column_searchable_list = column_editable_list
@@ -93,6 +108,23 @@ class UserView(MyModelView):
     # form_excluded_columns = column_exclude_list
     column_details_exclude_list = column_exclude_list
     column_filters = column_editable_list
+    
+        # print(len(self.session.query(User)))
+        # return len(self.session.query(User))
+    
+    @action('email', 'Email', 'Are you sure you want to email selected users?')
+    def action_email(self, ids):
+        try:
+            query = User.query.filter(User.id.in_(ids))
+            for user in query.all():
+                print (user.email)
+            flash("success")
+
+        except Exception as ex:
+            if not self.handle_view_exception(ex):
+                raise
+
+            flash("Failed")
 
 from flask_wtf import FlaskForm
 from wtforms import StringField, SubmitField, PasswordField
@@ -113,6 +145,17 @@ class CustomView(BaseView):
 @app.route('/')
 def index():
     return render_template('index.html')
+
+def get_total_users(db):
+    return len(db.session.query(User).all())
+
+"""
+Add anything you wanna to pass to the jinja template here!
+"""
+@app.context_processor
+def inject_paths():
+    
+    return dict(total_users=get_total_users(db))
 
 # Create admin
 admin = flask_admin.Admin(

@@ -1,0 +1,11 @@
+{% extends 'admin/model/list.html' %}
+{% block list_row_actions %}
+    {{ super() }}
+  <form class="icon" method="POST" action="/admin/user/action/">
+    <input id="action" name="action" value="email" type="hidden">
+    <input name="rowid" value="{{ get_pk_value(row) }}" type="hidden">
+    <button onclick="return confirm('Are you sure you want to email selected users?');" title="Confirm">
+      <span class="fa fa-ok glyphicon glyphicon-ok"></span>
+    </button>
+  </form>
+{% endblock %}
