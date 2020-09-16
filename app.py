@@ -145,6 +145,8 @@ class CustomView(BaseView):
                 print(filed.data)
         return self.render('admin/custom_index.html', form=form)
 
+
+
 # Flask views
 @app.route('/')
 def index():
