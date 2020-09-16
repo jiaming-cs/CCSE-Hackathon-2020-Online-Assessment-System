@@ -11,6 +11,8 @@ from flask_admin.contrib import sqla
 from flask_admin import helpers as admin_helpers
 from flask_admin import BaseView, expose
 from flask_admin.actions import action
+from utility.email_sender import EmailSender
+from utility.survey_form import SurveyForm
 
 
 # Create Flask application
@@ -114,10 +116,13 @@ class UserView(MyModelView):
     
     @action('email', 'Email', 'Are you sure you want to email selected users?')
     def action_email(self, ids):
+        es = EmailSender()
         try:
+            to_list = []
             query = User.query.filter(User.id.in_(ids))
             for user in query.all():
-                print (user.email)
+                to_list.append((user.first_name, user.email))
+            es.send_email(to_list, "www.google.com")
             flash("success")
 
         except Exception as ex:
@@ -129,16 +134,15 @@ class UserView(MyModelView):
 from flask_wtf import FlaskForm
 from wtforms import StringField, SubmitField, PasswordField
 from wtforms.validators import DataRequired, Length, Email, Required
-class SurveyForm(FlaskForm):
-    """
-    TODO
-    """
-    pass
+
 
 class CustomView(BaseView):
-    @expose('/')
+    @expose('/', methods=['GET', 'POST'])
     def index(self):
-        form = SurveyForm()
+        form = SurveyForm(request.form)
+        if request.method == 'POST' and form.validate():
+            for filed in form:
+                print(filed.data)
         return self.render('admin/custom_index.html', form=form)
 
 # Flask views

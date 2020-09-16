@@ -1,2 +1,6 @@
 venv/
 .vscode/
+const.py
+data/
+utility/db_connector.py
+__pycache__/

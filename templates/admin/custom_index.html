@@ -4,6 +4,7 @@
 
 {% if current_user.is_authenticated %}
 
+
 <!-- Content Header (Page header) -->
 <section class="content-header">
   <h1>
@@ -21,12 +22,21 @@
   <div class="row">
     <!-- Left col -->
     <section class="container">      
-      
-        Here you can place your custom data without a database dependence. <br>
-        Find this file in templates/admin/ as custom_index.html
 
-
-
+      <form method="POST">
+      {% for field in form %}
+        {% if field == form.submit %}
+        <tr>
+          <td>{{ field }}</td>
+        </tr>
+        {% else %}
+        <tr>
+            <th>{{ field.label }}</th>
+            <td>{{ field }}</td>
+        </tr>
+        {% endif %}
+      {% endfor %}
+      </form>
     </section>
     <!-- /.Left col -->
    
