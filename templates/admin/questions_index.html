@@ -8,12 +8,12 @@
 <!-- Content Header (Page header) -->
 <section class="content-header">
   <h1>
-    Custom View 
-    <small>This is a custom view without DB model</small>
+    Part I:
+    <small>You need to answer 65 multiple choice questions</small>
   </h1>
   <ol class="breadcrumb">
     <li><a href="#"><i class="fa fa-dashboard"></i> Home</a></li>
-    <li class="active">Custom</li>
+    <li class="active">Questions</li>
   </ol>
 </section>
 
@@ -24,23 +24,11 @@
     <section class="container">      
 
       <form method="POST">
-        <br>
-        <p>Part I: You need to answer 65 general questions</p>
-        <br>
       {% for field in form %}
           {% if field.name == "submit" %}
           <tr>
             <td>{{ field }}</td>
           </tr>
-          {% elif field.name == "qa_1" %}
-          <br>
-          <p>Part II: You need to answer 149 assessment questions</p>
-          <br>
-          <tr>
-            <th>{{ field.label }}</th>
-            <td>{{ field }}</td>
-          </tr>
-
           {% else %}
           <tr>
               <th>{{ field.label }}</th>

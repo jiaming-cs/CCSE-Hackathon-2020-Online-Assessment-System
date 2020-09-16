@@ -12,7 +12,8 @@ from flask_admin import helpers as admin_helpers
 from flask_admin import BaseView, expose
 from flask_admin.actions import action
 from utility.email_sender import EmailSender
-from utility.survey_form import SurveyForm
+from utility.questions_form import QuestionsForm
+from utility.assessment_form import AssessmentForm
 
 
 # Create Flask application
@@ -136,15 +137,23 @@ from wtforms import StringField, SubmitField, PasswordField
 from wtforms.validators import DataRequired, Length, Email, Required
 
 
-class CustomView(BaseView):
+class QuestionsView(BaseView):
     @expose('/', methods=['GET', 'POST'])
     def index(self):
-        form = SurveyForm(request.form)
+        form = QuestionsForm(request.form)
         if request.method == 'POST' and form.validate():
             for filed in form:
                 print(filed.data)
-        return self.render('admin/custom_index.html', form=form)
+        return self.render('admin/questions_index.html', form=form)
 
+class AssessmentView(BaseView):
+    @expose('/', methods=['GET', 'POST'])
+    def index(self):
+        form = AssessmentForm(request.form)
+        if request.method == 'POST' and form.validate():
+            for filed in form:
+                print(filed.data)
+        return self.render('admin/assessment_index.html', form=form)
 
 
 # Flask views
@@ -166,7 +175,7 @@ def inject_paths():
 # Create admin
 admin = flask_admin.Admin(
     app,
-    'My Dashboard',
+    'Online Assessment',
     base_template='my_master.html',
     template_mode='bootstrap3',
 )
@@ -174,7 +183,8 @@ admin = flask_admin.Admin(
 # Add model views
 admin.add_view(MyModelView(Role, db.session, menu_icon_type='fa', menu_icon_value='fa-server', name="Roles"))
 admin.add_view(UserView(User, db.session, menu_icon_type='fa', menu_icon_value='fa-users', name="Users"))
-admin.add_view(CustomView(name="Custom view", endpoint='custom', menu_icon_type='fa', menu_icon_value='fa-connectdevelop',))
+admin.add_view(QuestionsView(name="Questions", endpoint='questions', menu_icon_type='fa', menu_icon_value='fa-file-text-o',))
+admin.add_view(AssessmentView(name="Assessment", endpoint='assessment', menu_icon_type='fa', menu_icon_value='fa-file-text',))
 
 # define a context processor for merging flask-admin's template context into the
 # flask-security views.
