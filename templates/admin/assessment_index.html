@@ -8,8 +8,8 @@
 <!-- Content Header (Page header) -->
 <section class="content-header">
   <h1>
-    Part II: 
-    <small>You need to answer 149 assessment questions</small>
+    Online Assessment: 
+    <small>There are two parts of questions you need to fill out, please be patient. Once you have done, your score will be atumatically evaluated</small>
   </h1>
   <ol class="breadcrumb">
     <li><a href="#"><i class="fa fa-dashboard"></i> Home</a></li>
@@ -30,6 +30,25 @@
           <tr>
             <td>{{ field }}</td>
           </tr>
+
+          {% elif field.name == "q_1" %}
+          <b>Part I: There are totoally 65 general questions</b>
+          <br>
+          <br>
+          <tr>
+              <th>{{ field.label }}</th>
+              <td>{{ field }}</td>
+          </tr>
+
+          {% elif field.name == "qa_1" %}
+          <b>Part II: There are totoally 149 assessment questions</b>
+          <br>
+          <br>
+          <tr>
+              <th>{{ field.label }}</th>
+              <td>{{ field }}</td>
+          </tr>
+
           {% else %}
           <tr>
               <th>{{ field.label }}</th>
@@ -75,7 +94,7 @@
         </p>
       </div>
     </section>
-  </center>
+</center>
 
   <br><br><br><br><br><br><br><br><br>
   <br><br><br><br><br><br><br><br><br><br>

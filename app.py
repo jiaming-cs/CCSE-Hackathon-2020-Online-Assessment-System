@@ -1,10 +1,8 @@
 #!venv/bin/python
 import os
-from flask import Flask, url_for, redirect, render_template, request, abort, flash
-from flask_babel import gettext, ngettext
+from flask import Flask, url_for, redirect, render_template, request, abort, flash, session
 from flask_sqlalchemy import SQLAlchemy
-from flask_security import Security, SQLAlchemyUserDatastore, \
-    UserMixin, RoleMixin, login_required, current_user
+from flask_security import Security, SQLAlchemyUserDatastore, UserMixin, RoleMixin, login_required, current_user
 from flask_security.utils import encrypt_password
 import flask_admin
 from flask_admin.contrib import sqla
@@ -12,8 +10,8 @@ from flask_admin import helpers as admin_helpers
 from flask_admin import BaseView, expose
 from flask_admin.actions import action
 from utility.email_sender import EmailSender
-from utility.questions_form import QuestionsForm
 from utility.assessment_form import AssessmentForm
+from const import SCORE_MAP
 
 
 # Create Flask application
@@ -28,6 +26,23 @@ roles_users = db.Table(
     db.Column('user_id', db.Integer(), db.ForeignKey('user.id')),
     db.Column('role_id', db.Integer(), db.ForeignKey('role.id'))
 )
+
+class Survey(db.Model):
+    id = db.Column(db.Integer(), primary_key=True)
+    first_name = db.Column(db.String(255))
+    last_name = db.Column(db.String(255))
+    email = db.Column(db.String(255), unique=True)
+    suggestion = db.Column(db.String(1024))
+    history_scores = db.Column(db.String(512))
+    current_score = db.Column(db.Integer())
+    rank = db.Column(db.Integer())
+    active = db.Column(db.Boolean())
+    def __str__(self):
+        return self.email
+    
+    def __getitem__(self, field):
+        return self.__dict__[field]
+
 
 
 class Role(db.Model, RoleMixin):
@@ -53,6 +68,9 @@ class User(db.Model, UserMixin):
 
     def __str__(self):
         return self.email
+    
+    def __getitem__(self, field):
+        return self.__dict__[field]
 
 
 # Setup Flask-Security
@@ -104,6 +122,15 @@ class MyModelView(sqla.ModelView):
     # # this should take into account any filters/search inplace
     #     return 5
 
+class SurveyView(MyModelView):
+    column_editable_list = ['email', 'first_name', 'last_name']
+    column_searchable_list = column_editable_list
+    column_exclude_list = ['history_scores']
+    # form_excluded_columns = column_exclude_list
+    column_details_exclude_list = column_exclude_list
+    column_filters = column_editable_list
+    
+
 class UserView(MyModelView):
     column_editable_list = ['email', 'first_name', 'last_name']
     column_searchable_list = column_editable_list
@@ -137,22 +164,41 @@ from wtforms import StringField, SubmitField, PasswordField
 from wtforms.validators import DataRequired, Length, Email, Required
 
 
-class QuestionsView(BaseView):
-    @expose('/', methods=['GET', 'POST'])
-    def index(self):
-        form = QuestionsForm(request.form)
-        if request.method == 'POST' and form.validate():
-            for filed in form:
-                print(filed.data)
-        return self.render('admin/questions_index.html', form=form)
+
 
 class AssessmentView(BaseView):
     @expose('/', methods=['GET', 'POST'])
     def index(self):
         form = AssessmentForm(request.form)
         if request.method == 'POST' and form.validate():
+            print(session)
+            user_id = session['_user_id']
+            user = db.session.query(User).filter(User.id == user_id).first()
+            print(user)
+            user_first_name = user['first_name']
+            user_last_name = user['last_name']
+            user_email = user['email']
+            survey_user = db.session.query(Survey).filter(Survey.email == user_email)
+            score = 0
             for filed in form:
                 print(filed.data)
+                score += SCORE_MAP[filed.data]
+
+            rank = db.session.query(Survey).filter(Survey.current_score > score).count()+1
+            if survey_user.count() == 0:
+                survey_user = Survey(first_name = user_first_name, last_name = user_last_name, email = user_email, current_score = score, history_scores = str(score), rank = rank, active = False)  
+            else:
+                survey_user = survey_user.first()
+                if score < survey_user.current_score:
+                    rank -= 1
+                survey_user.current_score = score
+                survey_user.history_scores += ", "+str(score)
+                survey_user.rank = rank
+                db.session.add(survey_user)
+            db.session.commit()
+
+
+            
         return self.render('admin/assessment_index.html', form=form)
 
 
@@ -162,7 +208,7 @@ def index():
     return render_template('index.html')
 
 def get_total_users(db):
-    return len(db.session.query(User).all())
+    return db.session.query(User).count()
 
 """
 Add anything you wanna to pass to the jinja template here!
@@ -183,7 +229,7 @@ admin = flask_admin.Admin(
 # Add model views
 admin.add_view(MyModelView(Role, db.session, menu_icon_type='fa', menu_icon_value='fa-server', name="Roles"))
 admin.add_view(UserView(User, db.session, menu_icon_type='fa', menu_icon_value='fa-users', name="Users"))
-admin.add_view(QuestionsView(name="Questions", endpoint='questions', menu_icon_type='fa', menu_icon_value='fa-file-text-o',))
+admin.add_view(SurveyView(Survey, db.session, menu_icon_type='fa', menu_icon_value='fa-pencil-square-o', name="Surevy"))
 admin.add_view(AssessmentView(name="Assessment", endpoint='assessment', menu_icon_type='fa', menu_icon_value='fa-file-text',))
 
 # define a context processor for merging flask-admin's template context into the
