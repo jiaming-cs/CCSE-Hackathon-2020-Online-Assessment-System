@@ -4,7 +4,9 @@
 
 {% if current_user.is_authenticated %}
 
+<!--xiao-->
 <!-- Content Header (Page header) -->
+
 <section class="content-header">
     <h1>
       Dashboard 
@@ -16,14 +18,17 @@
   </ol>
 </section>
 
+
 <section class="content">
   <!-- Small boxes (Stat box) -->
   <div class="row">
+  {% if current_user.has_role('superuser') %}
+
     <div class="col-lg-3 col-xs-6">
       <!-- small box -->
       <div class="small-box bg-aqua">
         <div class="inner">
-          <h3>{{total_users}}</h3>
+          <h3>{{admin_display_info.total_user}}</h3>
           <p>Total Users</p>
       </div>
       <div class="icon">
@@ -38,9 +43,9 @@
   <!-- small box -->
   <div class="small-box bg-green">
     <div class="inner">
-      <h3>53<sup style="font-size: 20px">%</sup></h3>
+      <h3>{{admin_display_info.user_finished_survey}}<sup style="font-size: 20px"></sup></h3>
 
-      <p>Bounce Rate</p>
+      <p>Users Completed Survey</p>
   </div>
   <div class="icon">
       <i class="ion ion-stats-bars"></i>
@@ -53,9 +58,9 @@
   <!-- small box -->
   <div class="small-box bg-yellow">
     <div class="inner">
-      <h3>44</h3>
+      <h3>{{admin_display_info.highest_score}}</h3>
 
-      <p>User Registrations</p>
+      <p>Highest Score</p>
   </div>
   <div class="icon">
       <i class="ion ion-person-add"></i>
@@ -68,10 +73,10 @@
   <!-- small box -->
   <div class="small-box bg-red">
     <div class="inner">
-      <h3>65</h3>
+      <h3>{{admin_display_info.lowest_score}}</h3>
 
-      <p>Unique Visitors</p>
-  </div>
+      <p>Lowest Score</p>
+    </div>
   <div class="icon">
       <i class="ion ion-pie-graph"></i>
   </div>
@@ -80,6 +85,71 @@
 </div>
 <!-- ./col -->
 </div>
+{% else %}
+
+<div class="col-lg-3 col-xs-6">
+      <!-- small box -->
+  <div class="small-box bg-aqua">
+      <div class="inner">
+          <h3>{{user_display_info.score}}</h3>
+          <p>My Score</p>
+      </div>
+      <div class="icon">
+          <i class="ion ion-bag"></i>
+      </div>
+      <a href="#" class="small-box-footer">More info <i class="fa fa-arrow-circle-right"></i></a>
+  </div>
+</div>
+
+<!-- ./col -->
+<div class="col-lg-3 col-xs-6">
+  <!-- small box -->
+  <div class="small-box bg-green">
+    <div class="inner">
+      <h3>{{user_display_info.rank}}</h3>
+
+      <p>My Rank</p>
+  </div>
+  <div class="icon">
+      <i class="ion ion-stats-bars"></i>
+  </div>
+  <a href="#" class="small-box-footer">More info <i class="fa fa-arrow-circle-right"></i></a>
+</div>
+</div>
+<!-- ./col -->
+<div class="col-lg-3 col-xs-6">
+  <!-- small box -->
+  <div class="small-box bg-yellow">
+    <div class="inner">
+      <h3>{{user_display_info.above}}<sup style="font-size: 20px">%</sup></h3>
+
+      <p>Above Users</p>
+  </div>
+  <div class="icon">
+      <i class="ion ion-person-add"></i>
+  </div>
+  <a href="#" class="small-box-footer">More info <i class="fa fa-arrow-circle-right"></i></a>
+</div>
+</div>
+<!-- ./col -->
+<div class="col-lg-3 col-xs-6">
+  <!-- small box -->
+  <div class="small-box bg-red">
+    <div class="inner">
+      <h3>{{user_display_info.attempts}}</h3>
+      <p>Attempts</p>
+    </div>
+  <div class="icon">
+      <i class="ion ion-pie-graph"></i>
+  </div>
+  <a href="#" class="small-box-footer">More info <i class="fa fa-arrow-circle-right"></i></a>
+</div>
+</div>
+<!-- ./col -->
+</div>
+
+{% endif %}
+
 <!-- /.row -->
 <!-- Main row -->
 <div class="row">
