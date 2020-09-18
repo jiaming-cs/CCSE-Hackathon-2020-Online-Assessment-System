@@ -5,7 +5,7 @@ from wtforms.validators import DataRequired
 class AssessmentForm(Form):
     choice_type_1 = [("Criteria Met", "Criteria Met"), ("Partial Compliance", "Partial Compliance"),("Criteria Not Met", "Criteria Not Met")]
     choice_type_2 = [("Yes", "Yes"), ("No", "No")]
-    choice_type_3 = [("Always", "Always"), ("Almost", "Almost"), ("Never", "Never"), ("Almost Always", "Almost Always"), ("Sometimes", "Sometimes"), ("NA", "NA")]
+    choice_type_3 = [("Always", "Always"), ("Almost Never", "Almost Never"), ("Never", "Never"), ("Almost Always", "Almost Always"), ("Sometimes", "Sometimes"), ("NA", "NA")]
     
     q_1 = RadioField(label="1.I have a chaperone present during sensitive examinations, regardless of patient gender. ", choices=choice_type_3, validators=[DataRequired()])
     q_2 = RadioField(label="2.The name of the chaperone is documented in the medical record. ", choices=choice_type_3, validators=[DataRequired()])

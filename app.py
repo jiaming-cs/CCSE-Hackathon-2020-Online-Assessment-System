@@ -177,18 +177,20 @@ from wtforms.validators import DataRequired, Length, Email, Required
 class AssessmentView(BaseView):
     @expose('/', methods=['GET', 'POST'])
     def index(self):
+        
         form = AssessmentForm(request.form)
         if request.method == 'POST' and form.validate():
-
+            
             user_id = session['_user_id']
             user = db.session.query(User).filter(User.id == user_id).first()
             user_first_name = user['first_name']
             user_last_name = user['last_name']
             user_email = user['email']
+            
             survey_user = db.session.query(Survey).filter(Survey.email == user_email)
             score = 0
             for filed in form:
-                print(filed.data)
+               
                 score += SCORE_MAP[filed.data]
 
             rank = db.session.query(Survey).filter(Survey.current_score > score).count()+1
@@ -201,7 +203,7 @@ class AssessmentView(BaseView):
                 survey_user.current_score = score
                 survey_user.history_scores += ", "+str(score)
                 survey_user.rank = rank
-                db.session.add(survey_user)
+            db.session.add(survey_user)
             db.session.commit()
 
         return self.render('admin/assessment_index.html', form=form)
