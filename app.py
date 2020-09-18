@@ -197,7 +197,7 @@ class AssessmentView(BaseView):
                 db.session.add(survey_user)
             db.session.commit()
 
-
+        flash("You have successfully submitted your assessment!", "success")
             
         return self.render('admin/assessment_index.html', form=form)
 
