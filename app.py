@@ -197,7 +197,10 @@ class AssessmentView(BaseView):
                 db.session.add(survey_user)
             db.session.commit()
 
-        flash("You have successfully submitted your assessment!", "success")
+            es = EmailSender()
+            es.send_score(user_first_name, user_email, score)
+            
+            flash("You have successfully submitted your assessment!  You will receive an email with your score shortly", "success")
             
         return self.render('admin/assessment_index.html', form=AssessmentForm())
 
