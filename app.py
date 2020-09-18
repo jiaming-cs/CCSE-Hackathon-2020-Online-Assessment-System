@@ -67,6 +67,7 @@ class User(db.Model, UserMixin):
 
     active = db.Column(db.Boolean())
     confirmed_at = db.Column(db.DateTime(), default=datetime.utcnow)
+    taken_assessment = db.Column(db.Boolean(), default=False)
     roles = db.relationship('Role', secondary=roles_users,
                             backref=db.backref('users', lazy='dynamic'))
 
@@ -192,6 +193,7 @@ class AssessmentView(BaseView):
                 print(filed.data)
                 score += SCORE_MAP[filed.data]
 
+            user.taken_assessment = True
             rank = db.session.query(Survey).filter(Survey.current_score > score).count()+1
             if survey_user.count() == 0:
                 survey_user = Survey(first_name = user_first_name, last_name = user_last_name, email = user_email, current_score = score, history_scores = str(score), rank = rank, active = False)  
