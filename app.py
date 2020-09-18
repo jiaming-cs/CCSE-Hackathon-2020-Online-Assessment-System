@@ -199,7 +199,7 @@ class AssessmentView(BaseView):
 
         flash("You have successfully submitted your assessment!", "success")
             
-        return self.render('admin/assessment_index.html', form=form)
+        return self.render('admin/assessment_index.html', form=AssessmentForm())
 
 
 # Flask views
