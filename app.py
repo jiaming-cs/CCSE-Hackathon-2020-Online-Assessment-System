@@ -11,10 +11,11 @@ from flask_admin import BaseView, expose
 from flask_admin.actions import action
 from utility.email_sender import EmailSender
 from utility.assessment_form import AssessmentForm
-from const import SCORE_MAP
+from const import SCORE_MAP, SCORE_CATEGORY_DICT, TOTAL_SCORE
 from wtforms import StringField
 from wtforms.validators import DataRequired
 from datetime import datetime
+from utility.generate_random_password import gen_password
 
 
 # Create Flask application
@@ -118,17 +119,7 @@ class MyModelView(sqla.ModelView):
     can_view_details = True
     details_modal = True
 
-    # def render(self, template, **kwargs):
-    #     # we are only interested in the summary_list page
-        
-    #         # append a summary_data dictionary into kwargs
-    #         # The title attribute value appears in the actions column
-    #         # all other attributes correspond to their respective Flask-Admin 'column_list' definition
-    #     kwargs['total_users'] = self.total_users() 
-    #     return super(UserView, self).render(template, **kwargs)
-    # def total_users(self):
-    # # this should take into account any filters/search inplace
-    #     return 5
+
 
 class SurveyView(MyModelView):
     column_editable_list = ['email', 'first_name', 'last_name']
@@ -147,8 +138,7 @@ class UserView(MyModelView):
     column_details_exclude_list = column_exclude_list
     column_filters = column_editable_list
     
-        # print(len(self.session.query(User)))
-        # return len(self.session.query(User))
+
     
     @action('email', 'Email', 'Are you sure you want to email selected users?')
     def action_email(self, ids):
@@ -157,8 +147,13 @@ class UserView(MyModelView):
             to_list = []
             query = User.query.filter(User.id.in_(ids))
             for user in query.all():
-                to_list.append((user.first_name, user.email))
-            es.send_email(to_list, "www.google.com")
+                
+                renewed_password = gen_password()
+                user.password = encrypt_password(renewed_password)
+                to_list.append((user.first_name, user.email, renewed_password))
+                db.session.add(user)
+                db.session.commit()
+            es.send_invitation(to_list, "www.google.com")
             flash("success")
 
         except Exception as ex:
@@ -170,8 +165,6 @@ class UserView(MyModelView):
 from flask_wtf import FlaskForm
 from wtforms import StringField, SubmitField, PasswordField
 from wtforms.validators import DataRequired, Length, Email, Required
-
-
 
 
 class AssessmentView(BaseView):
@@ -189,26 +182,39 @@ class AssessmentView(BaseView):
             
             survey_user = db.session.query(Survey).filter(Survey.email == user_email)
             score = 0
-            for filed in form:
-               
-                score += SCORE_MAP[filed.data]
 
-            rank = db.session.query(Survey).filter(Survey.current_score > score).count()+1
+            suggestions_dict = {}
+            for i, filed in enumerate(form):
+                if i < 5:
+                    score += SCORE_MAP[filed.data]
+                else:
+                    max_score, category = SCORE_CATEGORY_DICT[i+60]
+                    if SCORE_MAP[filed.data] < max_score:
+                        suggestions_dict[category] = suggestions_dict.get(category, 0) + max_score - SCORE_MAP[filed.data]
+                    else:
+                        score += SCORE_MAP[filed.data]
+
+            # score = int((score / TOTAL_SCORE) * 100)
+
+            rank = db.session.query(Survey).filter((Survey.current_score > score) & (Survey.email != user_email)).count()+1
+
+            suggestion = "\n".join(list(suggestions_dict.keys()))
             if survey_user.count() == 0:
-                survey_user = Survey(first_name = user_first_name, last_name = user_last_name, email = user_email, current_score = score, history_scores = str(score), rank = rank, active = False)  
+                survey_user = Survey(first_name = user_first_name, last_name = user_last_name, email = user_email, current_score = score, history_scores = str(score), rank = rank, active = False, suggestion = suggestion)  
             else:
                 survey_user = survey_user.first()
-                if score < survey_user.current_score:
-                    rank -= 1
                 survey_user.current_score = score
                 survey_user.history_scores += ", "+str(score)
                 survey_user.rank = rank
+                survey_user.suggestion = suggestion
             db.session.add(survey_user)
             db.session.commit()
 
             es = EmailSender()
-            es.send_score(user_first_name, user_email, score)
+            es.send_score(user_first_name, user_email, score, suggestions_dict)
             flash("You have successfully submitted your assessment!", "success")
+
+            return self.render('admin/assessment_done_index.html')
 
         return self.render('admin/assessment_index.html', form=AssessmentForm())
 
@@ -225,8 +231,7 @@ def get_admin_display_info(db):
         user_finished_survey = db.session.query(Survey).count()
         higest_score = db.session.query(db.func.max(Survey.current_score)).scalar()
         lowest_score = db.session.query(db.func.min(Survey.current_score)).scalar()
-        print(higest_score)
-        print(lowest_score)
+
 
         return dict(total_user = total_user, user_finished_survey = user_finished_survey, highest_score = higest_score, lowest_score = lowest_score)
 
