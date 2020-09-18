@@ -191,7 +191,6 @@ class AssessmentView(BaseView):
                 print(filed.data)
                 score += SCORE_MAP[filed.data]
 
-            print(user_first_name)
             rank = db.session.query(Survey).filter(Survey.current_score > score).count()+1
             if survey_user.count() == 0:
                 survey_user = Survey(first_name = user_first_name, last_name = user_last_name, email = user_email, current_score = score, history_scores = str(score), rank = rank, active = False)  
@@ -205,9 +204,9 @@ class AssessmentView(BaseView):
                 db.session.add(survey_user)
             db.session.commit()
 
-        es = EmailSender()
-        es.send_score(user_first_name, user_email, score)
-        flash("You have successfully submitted your assessment!", "success")
+            es = EmailSender()
+            es.send_score(user_first_name, user_email, score)
+            flash("You have successfully submitted your assessment!", "success")
 
         return self.render('admin/assessment_index.html', form=AssessmentForm())
 
