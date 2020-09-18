@@ -205,7 +205,11 @@ class AssessmentView(BaseView):
                 db.session.add(survey_user)
             db.session.commit()
 
-        return self.render('admin/assessment_index.html', form=form)
+        es = EmailSender()
+        es.send_score(user_first_name, user_email, score)
+        flash("You have successfully submitted your assessment!", "success")
+
+        return self.render('admin/assessment_index.html', form=AssessmentForm())
 
 
 # Flask views
