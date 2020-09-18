@@ -14,6 +14,7 @@ from utility.assessment_form import AssessmentForm
 from const import SCORE_MAP
 from wtforms import StringField
 from wtforms.validators import DataRequired
+from datetime import datetime
 
 
 # Create Flask application
@@ -65,7 +66,7 @@ class User(db.Model, UserMixin):
     password = db.Column(db.String(255))
 
     active = db.Column(db.Boolean())
-    confirmed_at = db.Column(db.DateTime())
+    confirmed_at = db.Column(db.DateTime(), default=datetime.utcnow)
     roles = db.relationship('Role', secondary=roles_users,
                             backref=db.backref('users', lazy='dynamic'))
 
