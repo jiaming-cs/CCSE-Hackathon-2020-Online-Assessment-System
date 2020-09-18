@@ -2,7 +2,7 @@
 import os
 from flask import Flask, url_for, redirect, render_template, request, abort, flash, session
 from flask_sqlalchemy import SQLAlchemy
-from flask_security import Security, SQLAlchemyUserDatastore, UserMixin, RoleMixin, login_required, current_user
+from flask_security import Security, SQLAlchemyUserDatastore, UserMixin, RoleMixin, login_required, current_user, RegisterForm
 from flask_security.utils import encrypt_password
 import flask_admin
 from flask_admin.contrib import sqla
@@ -12,6 +12,8 @@ from flask_admin.actions import action
 from utility.email_sender import EmailSender
 from utility.assessment_form import AssessmentForm
 from const import SCORE_MAP
+from wtforms import StringField
+from wtforms.validators import DataRequired
 
 
 # Create Flask application
@@ -26,6 +28,7 @@ roles_users = db.Table(
     db.Column('user_id', db.Integer(), db.ForeignKey('user.id')),
     db.Column('role_id', db.Integer(), db.ForeignKey('role.id'))
 )
+
 
 class Survey(db.Model):
     id = db.Column(db.Integer(), primary_key=True)
@@ -73,9 +76,13 @@ class User(db.Model, UserMixin):
         return self.__dict__[field]
 
 
+class ExtendedRegisterForm(RegisterForm):
+    first_name = StringField('First Name', [DataRequired()])
+    last_name = StringField('Last Name', [DataRequired()])
+
 # Setup Flask-Security
 user_datastore = SQLAlchemyUserDatastore(db, User, Role)
-security = Security(app, user_datastore)
+security = Security(app, user_datastore, register_form=ExtendedRegisterForm)
 
 
 # Create customized model view class
@@ -199,7 +206,7 @@ class AssessmentView(BaseView):
 
             es = EmailSender()
             es.send_score(user_first_name, user_email, score)
-            
+
             flash("You have successfully submitted your assessment!  You will receive an email with your score shortly", "success")
             
         return self.render('admin/assessment_index.html', form=AssessmentForm())
