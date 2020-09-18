@@ -4,3 +4,4 @@ Flask-SQLAlchemy
 Flask-Security>=1.7.5
 enum34==1.1.6
 email_validator
+matplotlib==3.3.1

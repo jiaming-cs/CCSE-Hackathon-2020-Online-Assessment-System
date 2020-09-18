@@ -1,12 +1,14 @@
 import smtplib
 from email.mime.text import MIMEText
 from email.header import Header
+from email.mime.image import MIMEImage
 from email.mime.application import MIMEApplication
 from email.mime.multipart import MIMEMultipart
 import sys
 # sys.path.append("..")
 import time
-from const import EMAIL_USER_NAME, EMAIL_PASS_WORD
+from const import EMAIL_USER_NAME, EMAIL_PASS_WORD, SCORE_NOTIFICATION_EMAIL_TEMPLATE, INVITATION_EMAIL_TEMPLATE
+from utility.pie_chart import make_pie_chart
 
 
 
@@ -18,14 +20,14 @@ class EmailSender():
         self.passwd = EMAIL_PASS_WORD
         self.from_email = self.username
         
-    def send_email(self, to_list, link):
-        for user, email_address in to_list:
+    def send_invitation(self, to_list, link):
+        for user, email_address, password in to_list:
             msg = MIMEMultipart()
             msg["From"] = Header("MagMatual Assessment")
             msg["To"] = Header(user)
             msg["Subject"] = Header("Magmutal Assessment Survey")
             
-            text = "Dear {}, <br><br> You are invited to take Magmutal online assessment survey.<br><br>Please register then take the survey in this link: {}<br><br>Contact us if you have any other concerns! <br><br><br>Thanks,<br><br>Best Regards,<br><br>MagMutal Online Assessment Team".format(user, link)
+            text = INVITATION_EMAIL_TEMPLATE.format(name = user, email = email_address, password = password, link = link)
             text_part = MIMEText(text, "html", "utf-8")
             msg.attach(text_part)
             try:
@@ -40,15 +42,21 @@ class EmailSender():
                 print ("Fail to send message")
             email_conn.quit()
     
-    def send_score(self, user, email_address, score):
+    def send_score(self, user, email_address, score, suggesions_dict):
         msg = MIMEMultipart()
         msg["From"] = Header("MagMatual Assessment")
         msg["To"] = Header(user)
         msg["Subject"] = Header("Magmutal Assessment Survey Score")
         
-        text = "Dear {}, <br><br> Thank you for taking the survey. <br><br> Your score is {}.<br><br>Contact us if you have any other concerns! <br><br><br>Thanks,<br><br>Best Regards,<br><br>MagMutal Online Assessment Team".format(user, score)
+        text = SCORE_NOTIFICATION_EMAIL_TEMPLATE.format(name = user, score = score, suggestions = "<br><br>".join(list(suggesions_dict.keys())))
         text_part = MIMEText(text, "html", "utf-8")
         msg.attach(text_part)
+
+        make_pie_chart(suggesions_dict)
+        with open("./graphs/pie_chart.png", "rb") as f:
+            msg_image = MIMEImage(f.read())
+        msg_image.add_header('Content-ID', '<chart>')
+        msg.attach(msg_image)
         try:
             email_conn = smtplib.SMTP(self.host, self.port)
             email_conn.ehlo()
