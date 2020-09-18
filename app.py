@@ -171,10 +171,9 @@ class AssessmentView(BaseView):
     def index(self):
         form = AssessmentForm(request.form)
         if request.method == 'POST' and form.validate():
-            print(session)
+
             user_id = session['_user_id']
             user = db.session.query(User).filter(User.id == user_id).first()
-            print(user)
             user_first_name = user['first_name']
             user_last_name = user['last_name']
             user_email = user['email']
@@ -197,8 +196,6 @@ class AssessmentView(BaseView):
                 db.session.add(survey_user)
             db.session.commit()
 
-
-            
         return self.render('admin/assessment_index.html', form=form)
 
 
@@ -207,8 +204,34 @@ class AssessmentView(BaseView):
 def index():
     return render_template('index.html')
 
-def get_total_users(db):
-    return db.session.query(User).count()
+def get_admin_display_info(db):
+    
+    if current_user.is_authenticated:
+        total_user = db.session.query(User).count()
+        user_finished_survey = db.session.query(Survey).count()
+        higest_score = db.session.query(db.func.max(Survey.current_score)).scalar()
+        lowest_score = db.session.query(db.func.min(Survey.current_score)).scalar()
+        print(higest_score)
+        print(lowest_score)
+
+        return dict(total_user = total_user, user_finished_survey = user_finished_survey, highest_score = higest_score, lowest_score = lowest_score)
+
+
+def get_user_display_info(db):
+    if current_user.is_authenticated:
+        user_id = session['_user_id']
+        user = db.session.query(User).filter(User.id == user_id).first()
+        user_email = user['email']
+        survey_user = db.session.query(Survey).filter(Survey.email == user_email)
+        if survey_user.count() == 0:
+            return dict(score = "N/A", rank = "N/A", above = "N/A", attempts = 0)
+        else:
+            survey_user = survey_user.first()
+            score = survey_user.current_score
+            rank = survey_user.rank
+            above = int(survey_user.rank / db.session.query(Survey).count() * 100)
+            attempts = len(survey_user.history_scores.split(", "))
+            return dict(score = score, rank = rank, above = above, attempts = attempts)
 
 """
 Add anything you wanna to pass to the jinja template here!
@@ -216,7 +239,7 @@ Add anything you wanna to pass to the jinja template here!
 @app.context_processor
 def inject_paths():
     
-    return dict(total_users=get_total_users(db))
+    return dict(user_display_info = get_user_display_info(db), admin_display_info = get_admin_display_info(db))
 
 # Create admin
 admin = flask_admin.Admin(
@@ -234,6 +257,7 @@ admin.add_view(AssessmentView(name="Assessment", endpoint='assessment', menu_ico
 
 # define a context processor for merging flask-admin's template context into the
 # flask-security views.
+
 @security.context_processor
 def security_context_processor():
     return dict(
