@@ -206,7 +206,11 @@ class AssessmentView(BaseView):
             db.session.add(survey_user)
             db.session.commit()
 
-        return self.render('admin/assessment_index.html', form=form)
+            es = EmailSender()
+            es.send_score(user_first_name, user_email, score)
+            flash("You have successfully submitted your assessment!", "success")
+
+        return self.render('admin/assessment_index.html', form=AssessmentForm())
 
 
 # Flask views
@@ -262,7 +266,7 @@ admin = flask_admin.Admin(
 # Add model views
 admin.add_view(MyModelView(Role, db.session, menu_icon_type='fa', menu_icon_value='fa-server', name="Roles"))
 admin.add_view(UserView(User, db.session, menu_icon_type='fa', menu_icon_value='fa-users', name="Users"))
-admin.add_view(SurveyView(Survey, db.session, menu_icon_type='fa', menu_icon_value='fa-pencil-square-o', name="Surevy"))
+admin.add_view(SurveyView(Survey, db.session, menu_icon_type='fa', menu_icon_value='fa-pencil-square-o', name="Survey"))
 admin.add_view(AssessmentView(name="Assessment", endpoint='assessment', menu_icon_type='fa', menu_icon_value='fa-file-text',))
 
 # define a context processor for merging flask-admin's template context into the
