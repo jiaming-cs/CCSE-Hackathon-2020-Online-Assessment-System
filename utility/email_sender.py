@@ -23,9 +23,9 @@ class EmailSender():
     def send_invitation(self, to_list, link):
         for user, email_address, password in to_list:
             msg = MIMEMultipart()
-            msg["From"] = Header("MagMatual Assessment")
+            msg["From"] = Header("Magmutual Online Assessment")
             msg["To"] = Header(user)
-            msg["Subject"] = Header("Magmutal Assessment Survey")
+            msg["Subject"] = Header("Magmutual Assessment Invatation")
             
             text = INVITATION_EMAIL_TEMPLATE.format(name = user, email = email_address, password = password, link = link)
             text_part = MIMEText(text, "html", "utf-8")
@@ -44,9 +44,9 @@ class EmailSender():
     
     def send_score(self, user, email_address, score, suggesions_dict):
         msg = MIMEMultipart()
-        msg["From"] = Header("MagMatual Assessment")
+        msg["From"] = Header("Magmutual Online Assessment")
         msg["To"] = Header(user)
-        msg["Subject"] = Header("Magmutal Assessment Survey Score")
+        msg["Subject"] = Header("Magmutual Assessment Score")
         
         text = SCORE_NOTIFICATION_EMAIL_TEMPLATE.format(name = user, score = score, suggestions = "<br><br>".join(list(suggesions_dict.keys())))
         text_part = MIMEText(text, "html", "utf-8")

@@ -1,6 +1,6 @@
 # Hackathon-2020
 
-This repository is built for KSU CCSE 2020 Hackathon Magmutal Challenge.
+This repository is built for KSU CCSE 2020 Hackathon Magmutual Challenge.
 
 ## Usage
 

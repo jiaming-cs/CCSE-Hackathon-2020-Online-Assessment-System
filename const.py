@@ -5,7 +5,7 @@ INVITATION_EMAIL_TEMPLATE = '''
 Dear {name}, 
 <br>
 <br> 
-<p>You are invited to take Magmutal online assessment.</p>
+<p>You are invited to take Magmutual online assessment.</p>
 <br>
 <p>Please login using your email: <b>{email}</b>
 <br>
@@ -17,7 +17,7 @@ on <a href = {link}>this link</a></p>
 <br>
 <p>Best Regards,</p>
 <br>
-<p>MagMutal Online Assessment Team</p>
+<p>Magmutual Online Assessment Team</p>
 '''
 
 SCORE_NOTIFICATION_EMAIL_TEMPLATE = '''
@@ -34,7 +34,7 @@ Dear {name},
 <br>
 <p>Best Regards,</p>
 <br>
-<p>MagMutal Online Assessment Team</p>
+<p>Magmutual Online Assessment Team</p>
 '''
 
 SCORE_MAP = {'Criteria Met':3,
