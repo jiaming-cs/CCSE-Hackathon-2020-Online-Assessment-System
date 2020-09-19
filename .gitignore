@@ -3,4 +3,3 @@ venv/
 data/
 utility/db_connector.py
 __pycache__/
-config.py
