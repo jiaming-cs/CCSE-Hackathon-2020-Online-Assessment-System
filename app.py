@@ -122,6 +122,13 @@ class MyModelView(sqla.ModelView):
 
 
 class SurveyView(MyModelView):
+    def is_accessible(self):
+        if not current_user.is_authenticated:
+            return False
+
+        else:
+
+            return True
     column_editable_list = ['email', 'first_name', 'last_name']
     column_searchable_list = column_editable_list
     column_exclude_list = ['history_scores']
@@ -209,6 +216,13 @@ class AssessmentView(BaseView):
                 survey_user.suggestion = suggestion
             db.session.add(survey_user)
             db.session.commit()
+            
+            # renew rank for every one:
+            for user in db.session.query(Survey).all():
+                rank = db.session.query(Survey).filter((Survey.current_score > user.current_score) & (Survey.email != user.email)).count()+1
+                user.rank = rank
+                db.session.add(user)
+                db.session.commit()
 
             es = EmailSender()
             es.send_score(user_first_name, user_email, score, suggestions_dict)
