@@ -166,7 +166,7 @@ class UserView(MyModelView):
                 to_list.append((user.first_name, user.email, renewed_password))
                 db.session.add(user)
                 db.session.commit()
-            es.send_invitation(to_list, "www.google.com")
+            es.send_invitation(to_list, "http://34.71.141.43/")
             flash("success")
 
         except Exception as ex:
