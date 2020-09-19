@@ -115,9 +115,9 @@ class MyModelView(sqla.ModelView):
     # can_edit = True
     edit_modal = True
     create_modal = True    
-    can_export = True
-    can_view_details = True
-    details_modal = True
+    can_delete = False
+    can_edit = False
+    can_create = False
 
 
 
@@ -129,14 +129,20 @@ class SurveyView(MyModelView):
         else:
 
             return True
-    column_editable_list = ['email', 'first_name', 'last_name']
+    column_editable_list = []
     column_searchable_list = column_editable_list
     column_exclude_list = ['history_scores']
     # form_excluded_columns = column_exclude_list
     column_details_exclude_list = column_exclude_list
     column_filters = column_editable_list
     
-
+    edit_modal = False
+    edit_modal = False
+    create_modal = False    
+    can_export = False
+    can_view_details = True
+    details_modal = True
+    
 class UserView(MyModelView):
     column_editable_list = ['email', 'first_name', 'last_name']
     column_searchable_list = column_editable_list
