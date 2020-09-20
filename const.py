@@ -1,5 +1,5 @@
-EMAIL_USER_NAME = "magmutualassessment@gmail.com"
-EMAIL_PASS_WORD = "test123456!"
+EMAIL_USER_NAME = "your@email"
+EMAIL_PASS_WORD = "yourpassword"
 
 INVITATION_EMAIL_TEMPLATE = '''
 Dear {name}, 
