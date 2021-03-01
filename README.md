@@ -5,16 +5,16 @@ This repository is built for [KSU CCSE 2020 Hackathon](https://ccse.kennesaw.edu
 
 ## Functionalities
 * Risk Consultant can send the assessment requests out via email to policy holders. Then medical doctor (policy holder) can log into the system, take the assessment and submit.  
-![Email Sending](Graphs/email_sending.gif)
+![Email Sending](./Graphs/email_sending.gif)
 
 * System can capture the answers from a Likert scale and assign a score, then store it into the database.  
-![Do the Survey](Graphs/survey.gif)
+![Do the Survey](./Graphs/survey.gif)
 
 * System is also able to automatically generate the report after taking the assessment and send recommendation back to the selected policy holder.   
-![Auto Grade & Result Visualization](Graphs/feed_back.gif)
+![Auto Grade & Result Visualization](./Graphs/feed_back.gif)
 
 * Medical doctor can compare his scores with his peers who have also taken the assessment and see his risk score ranking.  
-![Login & Dashboard & Back Stage Management](Graphs/longin_dashboard.gif)
+![Login & Dashboard & Back Stage Management](./Graphs/longin_dashboard.gif)
 
 
 ## Usage
